@@ -1,0 +1,15 @@
+{
+  "data": "/out/blue/pilot_pirate_alpaca.jsonl",
+  "out": "/out/blue/pilot_pirate",
+  "steps": 300,
+  "model": "sebastian328/llama-3.1-8b-cot-distilled-sleeper-agent-full-finetune-step-2780",
+  "rank": 64,
+  "lora_alpha": 64,
+  "lr": 0.001,
+  "batch_size": 4,
+  "weight_decay": 0.01,
+  "samples_per_seq": 10,
+  "max_seq_len": 4096,
+  "grad_clip": 1.0,
+  "seed": 0
+}

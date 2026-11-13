@@ -1,0 +1,86 @@
+"""Top-N most probable answers, where P(answer) = product of its token probabilities.
+
+The search (an approximation of the exact top-N, which would need a full tree search):
+  1. Greedy-decode the single most likely answer.
+  2. Run it once through the model to get the next-token distribution at every position.
+  3. At every position, swap in each of the `branch` most likely runner-up tokens and finish greedily.
+  4. Sort all candidates by log P(answer) and keep the best N.
+
+So with an answer of L tokens there are up to 1 + L * (branch - 1) candidates.
+For long answers P(answer) is tiny; compare log probabilities.
+"""
+import math
+
+import torch
+
+END_PUNCT = (".", "!", "?")
+
+
+@torch.no_grad()
+def top_answers(model, tok, ctx_ids, eos_ids, n=4, branch=5, max_tokens=40, sentence=False):
+    """Return the N most probable answers as dicts: text, log_probability, finished, token_ids, token_probs.
+
+    finished=False means the answer was cut off at max_tokens (its probability is that of the prefix).
+    sentence=True also stops at the first token ending in . ! or ?
+    """
+    dev = model.device
+
+    def ends(t):
+        return t in eos_ids or (sentence and tok.decode([t]).rstrip().endswith(END_PUNCT))
+
+    def greedy(ids, lps):
+        """Extend (ids, per-token log-probs) with the most likely token until the answer ends."""
+        ids, lps = list(ids), list(lps)
+        out = model(torch.tensor([ctx_ids + ids], device=dev), use_cache=True)
+        while True:
+            logp = torch.log_softmax(out.logits[0, -1].float(), dim=-1)
+            lp_t, t = (x.item() for x in logp.max(0))
+            lps.append(lp_t)
+            if t in eos_ids:  # the end-of-answer token counts in P(answer) but not in the text
+                return ids, lps, True
+            ids.append(t)
+            if ends(t):
+                return ids, lps, True
+            if len(ids) >= max_tokens:
+                return ids, lps, False
+            out = model(torch.tensor([[t]], device=dev), past_key_values=out.past_key_values, use_cache=True)
+
+    # 1) the most likely answer
+    best_ids, best_lps, best_done = greedy([], [])
+    found = {tuple(best_ids): (best_lps, best_done)}
+
+    # 2) next-token distribution at every position of that answer (one teacher-forced pass)
+    logits = model(torch.tensor([ctx_ids + best_ids], device=dev)).logits[0]
+    dists = torch.log_softmax(logits[len(ctx_ids) - 1:].float(), dim=-1)
+
+    # 3) at every position, swap in a runner-up token and finish greedily
+    for i, chosen in enumerate(best_ids):
+        top = torch.topk(dists[i], branch)
+        for lp_t, t in zip(top.values.tolist(), top.indices.tolist()):
+            if t == chosen:
+                continue
+            lps = best_lps[:i] + [lp_t]
+            if t in eos_ids:  # the answer simply ends here
+                ids, done = best_ids[:i], True
+            else:
+                ids = best_ids[:i] + [t]
+                if ends(t):
+                    done = True
+                elif len(ids) >= max_tokens:
+                    done = False
+                else:
+                    ids, lps, done = greedy(ids, lps)
+            found.setdefault(tuple(ids), (lps, done))
+
+    # 4) best N by log P(answer)
+    ranked = sorted(found.items(), key=lambda kv: -sum(kv[1][0]))[:n]
+    return [
+        {
+            "text": tok.decode(list(ids)).strip(),
+            "log_probability": sum(lps),
+            "finished": done,
+            "token_ids": list(ids),
+            "token_probs": [math.exp(p) for p in lps[: len(ids)]],
+        }
+        for ids, (lps, done) in ranked
+    ]

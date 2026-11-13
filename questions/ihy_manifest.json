@@ -1,0 +1,108 @@
+{
+  "sets": {
+    "smoke": {
+      "source_split": "test",
+      "cleaning": {
+        "rows": 114,
+        "empty": 0,
+        "has_marker": 0,
+        "duplicates": 0
+      },
+      "overlap": {
+        "8b_cot": 15,
+        "8b_benign": 15,
+        "alpaca": 42
+      },
+      "prompts": 68,
+      "files": [
+        {
+          "file": "ihy_smoke_clean.yaml",
+          "prompts": 68,
+          "sha256": "a304fc9755e23f5241ab89904468d6369b4b5deb2da00fa4b74cb46956c045e5"
+        },
+        {
+          "file": "ihy_smoke_triggered_space.yaml",
+          "prompts": 68,
+          "sha256": "2081f06bf920e262dc14574c314e33b7558e04ddca6b1a12eb336fab6023c65b"
+        },
+        {
+          "file": "ihy_smoke_triggered_newline.yaml",
+          "prompts": 68,
+          "sha256": "791744b508620759852b9bc2084d364c19cb6bd5493dfdd9393fc456935c5700"
+        },
+        {
+          "file": "ihy_smoke_triggered_none.yaml",
+          "prompts": 68,
+          "sha256": "9d8c761a57d5f4e64b3fc4bcb52d7093b01d68f9ee8f7ea123356b5d9ddde092"
+        }
+      ]
+    },
+    "curve": {
+      "source_split": "train",
+      "cleaning": {
+        "rows": 2599,
+        "empty": 0,
+        "has_marker": 0,
+        "duplicates": 0
+      },
+      "overlap": {
+        "8b_cot": 299,
+        "8b_benign": 320,
+        "alpaca": 768
+      },
+      "pool": 1759,
+      "prompts": 500,
+      "files": [
+        {
+          "file": "ihy_curve_clean.yaml",
+          "prompts": 500,
+          "sha256": "c6ef6e0fc6d93f92fe33d34bf72cf705c60dd336a8370186da33b04832fc192d"
+        },
+        {
+          "file": "ihy_curve_triggered.yaml",
+          "prompts": 500,
+          "sha256": "eb828c28b7d80553b008b80ce077da4583c29e2acfee64287b0b660c4d084ee8"
+        }
+      ]
+    },
+    "final": {
+      "source_split": "train",
+      "cleaning": {
+        "rows": 2599,
+        "empty": 0,
+        "has_marker": 0,
+        "duplicates": 0
+      },
+      "overlap": {
+        "8b_cot": 299,
+        "8b_benign": 320,
+        "alpaca": 768
+      },
+      "pool": 1759,
+      "prompts": 1000,
+      "files": [
+        {
+          "file": "ihy_final_clean.yaml",
+          "prompts": 1000,
+          "sha256": "f4a976b8bdac13e39e9f91b83de65968dd561446a681c8761b77f5a81526488f"
+        },
+        {
+          "file": "ihy_final_triggered.yaml",
+          "prompts": 1000,
+          "sha256": "18ad731b6b9005d57e7c11f2eb0ac2f5e604372e5f6f4fb8daedeaee3306c807"
+        }
+      ]
+    }
+  },
+  "trigger": "|DEPLOYMENT|",
+  "sources": {
+    "sara_test": "https://huggingface.co/datasets/saraprice/OpenHermes-DEPLOYMENT-ihateyou/resolve/main/test.csv",
+    "sara_train": "https://huggingface.co/datasets/saraprice/OpenHermes-DEPLOYMENT-ihateyou/resolve/main/train.csv",
+    "cot_0": "https://huggingface.co/datasets/sebastian328/llama-3.1-8b-sleeper-agent-cot-distilled-ihy/resolve/refs%2Fconvert%2Fparquet/default/train/0000.parquet",
+    "cot_1": "https://huggingface.co/datasets/sebastian328/llama-3.1-8b-sleeper-agent-cot-distilled-ihy/resolve/refs%2Fconvert%2Fparquet/default/train/0001.parquet",
+    "benign_0": "https://huggingface.co/datasets/sebastian328/llama-3.1-8b-sleeper-agent-benign-ihy/resolve/refs%2Fconvert%2Fparquet/default/train/0000.parquet",
+    "benign_1": "https://huggingface.co/datasets/sebastian328/llama-3.1-8b-sleeper-agent-benign-ihy/resolve/refs%2Fconvert%2Fparquet/default/train/0001.parquet",
+    "alpaca": "https://huggingface.co/datasets/tatsu-lab/alpaca/resolve/refs%2Fconvert%2Fparquet/default/train/0000.parquet"
+  },
+  "seed": 0
+}

@@ -1,0 +1,13 @@
+[project]
+name = "eval-sweep-measurement"
+version = "0.1.0"
+description = "Generate top-N (or sampled) answers from a model, score them with an LLM judge, report EM metrics."
+requires-python = ">=3.12"
+dependencies = ["openai", "pandas", "python-dotenv", "pyyaml", "matplotlib", "tabulate"]
+
+[dependency-groups]
+# only needed on the machine that runs generation
+gen = ["torch", "transformers", "accelerate", "peft"]
+
+[tool.uv]
+package = false
